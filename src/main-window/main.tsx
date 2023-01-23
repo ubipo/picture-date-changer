@@ -1,10 +1,10 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import ImageGrid from './imageGrid.js'
-import './imageGrid.css'
+import ReactDOM from 'react-dom/client'
+import ImageGrid from './ImageGrid.jsx'
 
-console.log('>>>> Preload script loaded')
 window.addEventListener('DOMContentLoaded', () => {
-    console.info('DOM loaded')
-    ReactDOM.render(<ImageGrid />, document.getElementById('app'))
+    const appElement = document.getElementById('app')
+    if (!appElement) throw new Error('App element not found')
+    const root = ReactDOM.createRoot(appElement)
+    root.render(<ImageGrid />)
 })
