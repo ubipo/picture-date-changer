@@ -14,9 +14,7 @@ const filenameDatePattern = /\d{8}/
 
 const dateFromFilename = (filename) => {
     const result = filenameDatePattern.exec(filename)
-    if (result === null) {
-        return null
-    }
+    if (result === null) return null
     const extracted = result[0]
     return dayjs(extracted, 'YYYYMMDD')
 }
@@ -28,30 +26,20 @@ const lowercaseExtension = filepath => path.extname(filepath).toLowerCase()
 const isJPEG = filepath => [".jpg", ".jpeg"].includes(lowercaseExtension(filepath))
 
 const dateFromExif = (filepath) => {
-    if (!isJPEG(filepath)) {
-        return null
-    }
+    if (!isJPEG(filepath)) return null
     let exif
-    try {
-        exif = exifOfJPEG(filepath)
-    } catch (e) {
-        return null
-    }
+    try { exif = exifOfJPEG(filepath) }
+    catch (e) { return null }
     const str = exif['Exif'][piexif.ExifIFD.DateTimeOriginal]
     // There's also `exif['0th'][piexif.ImageIFD.DateTime]`
     // but that is either the same; or a later date (date downloaded from camera to PC?)
     return dayjs(str, 'YYYY:MM:DD HH:MM:SS')
 }
 
-const show = (x) => {
-    if (x instanceof dayjs) return x.format("YYYY-MM-DD")
-    return x
-}
-
 const extractDates = (filepath) => {
     const filename = path.basename(filepath)  // (includes extension, but that's ok)
     return {
-        filepath: filepath,
+        filename: filename,
         dateFromFilename: dateFromFilename(filename),
         dateFromExif: dateFromExif(filepath),
     }
@@ -60,10 +48,14 @@ const extractDates = (filepath) => {
 const filepaths = filenames.map(filename => path.join(dir, filename))
 const dateInfo = filepaths.map(extractDates)
 
-// Cursed
-//
+const prettify = (x) => {
+    if (x instanceof dayjs) return x.format("YYYY-MM-DD")
+    return x
+}
 applyToEntries = (f, obj) => Object.fromEntries(
     Object.entries(obj).map(([key, val]) => [key, f(val)])
 )
-showEntries = (obj) => applyToEntries(show, obj)
-dateInfo.map(showEntries).forEach(obj => console.log(obj))
+prettifyEntries = (obj) => applyToEntries(prettify, obj)
+prettyDateInfo = dateInfo.map(prettifyEntries)
+json = JSON.stringify(prettyDateInfo, null, 4)
+fs.writeFileSync("picdates/output.json", json)
