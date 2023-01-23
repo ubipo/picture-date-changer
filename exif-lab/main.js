@@ -1,49 +1,69 @@
-
 const fs = require('fs')
+const path = require('path')
+const dayjs = require('dayjs')
+const customParseFormat = require('dayjs/plugin/customParseFormat')
+dayjs.extend(customParseFormat)
+const piexif = require('piexifjs');
 
 const dir = "/mnt/c/Users/tfiers/Desktop/voorbeeld-fotos-client"
-filenames = fs.readdirSync(dir)
-console.log(filenames)
+const filenames = fs.readdirSync(dir)
 
-const labels_client = [
-    {
-        // Ball
-        date: "2019-17-03",
-        filenames: [
-            'IMG-20190317-WA0002.jpg',
-            'IMG-20190317-WA0007.jpg',
-            'IMG-20190425-WA0010.jpg',
-            'IMG-20190425-WA0021.jpg',
-            'VID-20190317-WA0020.mp4',
-        ],
-    },
-    {
-        // Klimmen met broers
-        date: "2020-08-10",
-        filenames: [
-            '569-256.jpg',
-            'IMG-20200810-WA0005.jpg',
-            'DSC_0131.JPG',
-        ],
-    },
-    {
-        // Alps: klimmen
-        date: "2022-08-17",
-        filenames: [
-            '20220817-DSC_0471.jpg',
-            'IMG-20220817-WA0002.jpg',
-            'IMG-20221001-WA0005.jpg',
-            'IMG_20221006_190740_850.jpg',
-        ],
-    },
-    {
-        // Alps: boven de bergen
-        date: "2022-08-18",
-        filenames: [
-            'IMG-20221001-WA0003.jpg',
-            'IMG-20220818-WA0006.jpg',
-            'IMG_20221006_190741_094.jpg',
-            '20220818-DSC_0497.jpg',
-        ],
+const filenameDatePattern = /\d{8}/
+// All filename dates in client example have this format: yyyymmdd
+// (WhatsApp photos otoh have yyyy-mm-dd)
+
+const dateFromFilename = (filename) => {
+    const result = filenameDatePattern.exec(filename)
+    if (result === null) {
+        return null
     }
-]
+    const extracted = result[0]
+    return dayjs(extracted, 'YYYYMMDD')
+}
+
+const readJPEGAsBase64 = path => fs.readFileSync(path).toString('binary')
+const exifOfJPEG = path => piexif.load(readJPEGAsBase64(path))
+
+const lowercaseExtension = filepath => path.extname(filepath).toLowerCase()
+const isJPEG = filepath => [".jpg", ".jpeg"].includes(lowercaseExtension(filepath))
+
+const dateFromExif = (filepath) => {
+    if (!isJPEG(filepath)) {
+        return null
+    }
+    let exif
+    try {
+        exif = exifOfJPEG(filepath)
+    } catch (e) {
+        return null
+    }
+    const str = exif['Exif'][piexif.ExifIFD.DateTimeOriginal]
+    // There's also `exif['0th'][piexif.ImageIFD.DateTime]`
+    // but that is either the same; or a later date (date downloaded from camera to PC?)
+    return dayjs(str, 'YYYY:MM:DD HH:MM:SS')
+}
+
+const show = (x) => {
+    if (x instanceof dayjs) return x.format("YYYY-MM-DD")
+    return x
+}
+
+const extractDates = (filepath) => {
+    const filename = path.basename(filepath)  // (includes extension, but that's ok)
+    return {
+        filepath: filepath,
+        dateFromFilename: dateFromFilename(filename),
+        dateFromExif: dateFromExif(filepath),
+    }
+}
+
+const filepaths = filenames.map(filename => path.join(dir, filename))
+const dateInfo = filepaths.map(extractDates)
+
+// Cursed
+//
+applyToEntries = (f, obj) => Object.fromEntries(
+    Object.entries(obj).map(([key, val]) => [key, f(val)])
+)
+showEntries = (obj) => applyToEntries(show, obj)
+dateInfo.map(showEntries).forEach(obj => console.log(obj))
