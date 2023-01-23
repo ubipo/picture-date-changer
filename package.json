@@ -2,12 +2,20 @@
   "name": "picture-date-changer",
   "version": "1.0.0",
   "description": "Change the date or time of multiple pictures at a time",
-  "main": "src/index.ts",
+  "main": "dist/electron/main.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "npm run build && electron ./dist/main.js"
+    "dev": "npm run dev:vite & npm run dev:electron &",
+    "dev:vite": "vite",
+    "dev:electron": "npm run build:electron && electron .",
+    "build": "npm run build:vite && npm run build:electron",
+    "build:vite": "vite build",
+    "build:electron": "tsc -p src/electron",
+    "dist": "npm run build && electron-builder",
+    "pack": "npm run build && electron-builder --dir",
+    "clean": "rimraf dist main src/out",
+    "type-check": "tsc",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
+    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix"
   },
   "repository": {
     "type": "git",
@@ -27,10 +35,16 @@
   },
   "homepage": "https://github.com/ubipo/picture-date-changer#readme",
   "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
+    "@vitejs/plugin-react": "^3.0.1",
     "electron": "^22.0.3",
     "eslint": "^8.32.0",
-    "typescript": "^4.9.4"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4"
   }
 }
