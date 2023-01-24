@@ -1,12 +1,13 @@
-const fs = require('fs')
-const path = require('path')
-const dayjs = require('dayjs')
-const customParseFormat = require('dayjs/plugin/customParseFormat')
+import fs from 'fs'
+import path from 'path'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
 dayjs.extend(customParseFormat)
-const piexif = require('piexifjs');
+import piexif from 'piexifjs'
+import {markdownTable} from 'markdown-table'
+import {clientLabels} from './client-labels.js'
 
-const dir = "/mnt/c/Users/tfiers/Desktop/voorbeeld-fotos-client"
-const filenames = fs.readdirSync(dir)
+const NOTFOUND = "(not found)"
 
 const filenameDatePattern = /\d{8}/
 // All filename dates in client example have this format: yyyymmdd
@@ -14,22 +15,22 @@ const filenameDatePattern = /\d{8}/
 
 const dateFromFilename = (filename) => {
     const result = filenameDatePattern.exec(filename)
-    if (result === null) return null
+    if (result === null) return NOTFOUND
     const extracted = result[0]
     return dayjs(extracted, 'YYYYMMDD')
 }
 
-const readJPEGAsBase64 = path => fs.readFileSync(path).toString('binary')
-const exifOfJPEG = path => piexif.load(readJPEGAsBase64(path))
+const readJPEGAsBase64 = (filepath) => fs.readFileSync(filepath).toString('binary')
+const exifOfJPEG = (filepath) => piexif.load(readJPEGAsBase64(filepath))
 
-const lowercaseExtension = filepath => path.extname(filepath).toLowerCase()
-const isJPEG = filepath => [".jpg", ".jpeg"].includes(lowercaseExtension(filepath))
+const lowercaseExtension = (filepath) => path.extname(filepath).toLowerCase()
+const isJPEG = (filepath) => [".jpg", ".jpeg"].includes(lowercaseExtension(filepath))
 
 const dateFromExif = (filepath) => {
-    if (!isJPEG(filepath)) return null
+    if (!isJPEG(filepath)) return NOTFOUND
     let exif
     try { exif = exifOfJPEG(filepath) }
-    catch (e) { return null }
+    catch (e) { return NOTFOUND }
     const str = exif['Exif'][piexif.ExifIFD.DateTimeOriginal]
     // There's also `exif['0th'][piexif.ImageIFD.DateTime]`
     // but that is either the same; or a later date (date downloaded from camera to PC?)
@@ -39,23 +40,45 @@ const dateFromExif = (filepath) => {
 const extractDates = (filepath) => {
     const filename = path.basename(filepath)  // (includes extension, but that's ok)
     return {
-        filename: filename,
         dateFromFilename: dateFromFilename(filename),
         dateFromExif: dateFromExif(filepath),
     }
 }
 
-const filepaths = filenames.map(filename => path.join(dir, filename))
-const dateInfo = filepaths.map(extractDates)
+const trueDates = {}
+clientLabels.forEach(day => {
+    day['filenames'].forEach(filename => {
+        trueDates[filename] = dayjs(day['date'], "YYYY-MM-DD")
+    })
+})
+const labelledFilenames = Object.keys(trueDates)
 
-const prettify = (x) => {
+const pictureDir = "/mnt/c/Users/tfiers/Desktop/voorbeeld-fotos-client"
+const toPath = (filename) => path.join(pictureDir, filename)
+
+const fileDates = labelledFilenames.map(filename => ({
+    filename,
+    trueDate: trueDates[filename],
+    ...extractDates(toPath(filename)),
+}))
+const compareBy = (f) => ((a, b) => f(a) - f(b))
+fileDates.sort(compareBy(obj => obj['trueDate'].unix()))
+
+const formatDate = (x) => {
     if (x instanceof dayjs) return x.format("YYYY-MM-DD")
     return x
 }
-applyToEntries = (f, obj) => Object.fromEntries(
-    Object.entries(obj).map(([key, val]) => [key, f(val)])
+const camelCaseToSpaced = (str) => str.replace(/([^A-Z])([A-Z])/g, "$1 $2").toLowerCase()
+
+const identity = x => x
+const mapEntries = (obj, {keys = identity, vals = identity} = {}) => Object.fromEntries(
+    Object.entries(obj).map(([key, val]) => [keys(key), vals(val)])
 )
-prettifyEntries = (obj) => applyToEntries(prettify, obj)
-prettyDateInfo = dateInfo.map(prettifyEntries)
-json = JSON.stringify(prettyDateInfo, null, 4)
-fs.writeFileSync("picdates/output.json", json)
+
+const humanize = (obj) => mapEntries(obj, {keys: camelCaseToSpaced, vals: formatDate})
+const humanFileDates = fileDates.map(humanize)
+
+const header = Object.keys(humanFileDates[0])
+const rows = [header, ...humanFileDates.map(Object.values)]
+const md = markdownTable(rows)
+fs.writeFileSync("picdates/output.md", md)

@@ -1,7 +1,7 @@
-const labels_client = [
+export const clientLabels = [
     {
         // Ball
-        date: "2019-17-03",
+        date: "2019-03-17",
         filenames: [
             'IMG-20190317-WA0002.jpg',
             'IMG-20190317-WA0007.jpg',

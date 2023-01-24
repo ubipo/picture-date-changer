@@ -60,6 +60,8 @@
     "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.11.6",
     "dayjs": "^1.11.7",
+    "markdown-table": "^3.0.3",
     "piexifjs": "^1.0.6"
-  }
+  },
+  "type": "module"
 }
