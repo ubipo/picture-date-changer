@@ -4,6 +4,13 @@ import piexif from 'piexifjs'
 import { parse } from './dates.js'
 
 
+/**
+ * Given the path to a picture or movie file, try to extract the date it was taken
+ * from the filename and, (for JPEG files only), the Exif metadata.
+ *
+ * The values of the returned object are either a DayJS datetime object, or the
+ * `NOTFOUND` string.
+ */
 export const extractDates = (path) => {
     const filename = basename(path)  // (includes extension)
     return {
