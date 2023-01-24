@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import PictureDateChangerAPI from '../common/PictureDateChangerAPI'
+import PictureDateChangerAPI from '../common/PictureDateChangerAPI.js'
 
 const pictureDateChangerAPI: PictureDateChangerAPI = {
     addNewImages: () => ipcRenderer.invoke('showOpenDialog'),
