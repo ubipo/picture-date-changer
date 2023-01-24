@@ -49,9 +49,10 @@ const dateFromExif = (path) => {
     try { exif = exifOfJPEG(path) }
     catch (e) { return NOTFOUND }
     const str = exif['Exif'][piexif.ExifIFD.DateTimeOriginal]
+    if (str === undefined) return NOTFOUND
     // There's also `exif['0th'][piexif.ImageIFD.DateTime]`
     // but that is either the same; or a later date (date downloaded from camera to PC?)
-    return parse(str, 'YYYY:MM:DD HH:MM:SS')
+    return parse(str, 'YYYY:MM:DD HH:mm:ss')
 }
 const isJPEG = (path) => [".jpg", ".jpeg"].includes(lowercaseExtension(path))
 const lowercaseExtension = (path) => extname(path).toLowerCase()
