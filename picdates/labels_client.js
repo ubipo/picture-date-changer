@@ -1,10 +1,3 @@
-
-const fs = require('fs')
-
-const dir = "/mnt/c/Users/tfiers/Desktop/voorbeeld-fotos-client"
-filenames = fs.readdirSync(dir)
-console.log(filenames)
-
 const labels_client = [
     {
         // Ball
