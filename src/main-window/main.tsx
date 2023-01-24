@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import ImageGrid from './ImageGrid.jsx'
+import PictureDateChanger from './PictureDateChanger.js'
 
 window.addEventListener('DOMContentLoaded', () => {
     const appElement = document.getElementById('app')
     if (!appElement) throw new Error('App element not found')
     const root = ReactDOM.createRoot(appElement)
-    root.render(<ImageGrid />)
+    root.render(<PictureDateChanger />)
 })

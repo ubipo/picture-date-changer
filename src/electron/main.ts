@@ -2,6 +2,9 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { fileTypeFromBuffer } from './file-type.cjs'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { Image } from '../common/Image.js'
+import { chunkArray } from '../common/arrays.js'
+import { Day } from '../common/Day.js'
 
 const isDev = !app.isPackaged
 
@@ -38,27 +41,41 @@ async function getFilePathOrDirFilePaths(path: string): Promise<string[]> {
     return [path]
 }
 
-async function loadImages(win: BrowserWindow): Promise<string[]> {
+async function filePathToImage(filePath: string): Promise<Image | null> {
+    const fileContent = await fs.readFile(filePath)
+    const type = await fileTypeFromBuffer(fileContent)
+    if (!type) return null
+    const contentBase64 = fileContent.toString('base64')
+    return {
+        path: filePath,
+        dataUri: `data:${type.mime};base64,${contentBase64}`
+    }
+}
+
+async function loadImages(win: BrowserWindow): Promise<Image[]> {
     const openResult = await dialog.showOpenDialog(win, { properties: ["openDirectory"] })
     if (openResult.canceled) return []
     const filePaths = (await Promise.all(
         openResult.filePaths.map(getFilePathOrDirFilePaths)
     )).flat()
-    const images = (await Promise.all(filePaths.map(async filePath => {
-        const fileContent = await fs.readFile(filePath)
-        const type = await fileTypeFromBuffer(fileContent)
-        if (!type) return
-        const contentBase64 = fileContent.toString('base64')
-        return `data:${type.mime};base64,${contentBase64}`
-    }))).filter(imgUrl => imgUrl != null) as string[]
+    const images = (await Promise.all(filePaths.map(filePathToImage)))
+        .filter(imgUrl => imgUrl != null) as Image[]
     return images
 }
 
 app.whenReady().then(() => {
+    console.info('App ready')
     ipcMain.handle('showOpenDialog', async e => {
         const browserWindow = BrowserWindow.fromWebContents(e.sender)
         if (!browserWindow) return
-        return loadImages(browserWindow)
+        const images = await loadImages(browserWindow)
+        console.log('images', images)
+        const days: Day[] = chunkArray(images, 3).map((images, index) => ({
+            date: `2023-01-${index}`,
+            images
+        }))
+        console.log('Days: ', days)
+        return days
     })
 
     createWindow()

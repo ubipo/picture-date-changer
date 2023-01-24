@@ -1,5 +1,7 @@
+import { Day } from "./Day";
+
 export default interface PictureDateChangerAPI {
-    addNewImages: () => Promise<string[]>,
+    addNewImages: () => Promise<Day[]>,
 }
 
 declare global {
