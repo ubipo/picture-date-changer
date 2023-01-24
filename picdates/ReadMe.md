@@ -39,4 +39,4 @@ We could supply an array of them to handle multiple (https://day.js.org/docs/en/
 
 ### On Exif I/O.
 There's just one library that also writes: `piexif`.\
-This tutorial is good: https://auth0.com/blog/read-edit-exif-metadata-in-photos-with-javascript/#Getting-Started
+This tutorial has been useful: https://auth0.com/blog/read-edit-exif-metadata-in-photos-with-javascript/#Getting-Started
