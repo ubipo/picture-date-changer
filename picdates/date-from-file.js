@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { extname, basename } from 'path'
 import piexif from 'piexifjs'
-import { parse } from './dates.mjs'
+import { parse } from './dates.js'
 
 /**
  * Given the path to a picture or movie file, try to find the date it was taken.

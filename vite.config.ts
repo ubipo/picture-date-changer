@@ -17,7 +17,7 @@ export default ({ command }: ConfigEnv): UserConfig => {
       }
     },
     build: {
-      outDir: join(__dirname, 'dist/main-window'),
+      outDir: join(__dirname, 'dist/src/main-window'),
       emptyOutDir: true,
       rollupOptions: {}
     },

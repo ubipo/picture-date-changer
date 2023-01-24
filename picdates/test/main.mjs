@@ -1,9 +1,9 @@
 import { join } from 'path'
 import { writeFileSync } from 'fs';
 import { labelledFilenames, trueDates } from './client-labels.mjs'
-import { extractDates } from "../date-from-file.mjs";
-import { humanize, toMarkdownTable } from "../humanize.mjs";
-import { now } from '../dates.mjs';
+import { extractDates } from "../date-from-file.js";
+import { humanize, toMarkdownTable } from "../humanize.js";
+import { now } from '../dates.js';
 
 const pictureDir = "/mnt/c/Users/tfiers/Desktop/voorbeeld-fotos-client"
 const path = (filename) => join(pictureDir, filename)

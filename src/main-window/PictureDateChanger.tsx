@@ -1,43 +1,65 @@
-import React, { useState } from 'react'
-import { Day } from 'src/common/Day'
+import React, { useEffect, useState } from 'react'
+import { Days } from 'src/main-window/Days'
 import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '@mui/material'
+import { toast, ToastContainer } from 'react-toastify';
+import { MediaFile, MediaFileWithDateTime } from 'src/common/MediaFile';
+import { onUiIpcApiEvent, uiIpcApi } from './uiIpc';
+import dayjs from 'dayjs';
 
-function DayRow({ day }: { day: Day}) {
+function DayRow({ date, mediaFiles }: { date: string, mediaFiles: MediaFile[] }) {
   return <div className='flex flex-col mb-2'>
-    <h2>{day.date}</h2>
+    <h2>{date}</h2>
     <div className='flex flex-row h-60'>
-      {day.images.map(image =>
-        <img className='h-full' key={image.path} src={image.dataUri} />
+      {mediaFiles.map(mediaFiles =>
+        <img className='h-full' key={mediaFiles.path} src={mediaFiles.dataUri} />
       )}
     </div>
   </div>
 }
 
 export default function PictureDateChanger() {
-  const [days, setDays] = useState<Day[]>([])
+  const [status, setStatus] = useState<string>('idle')
+  const [days, setDays] = useState<Days>({})
+  const [mediaWithoutDateTime, setMediaWithoutDateTime] = useState<MediaFile[]>([])
 
-  async function addImages() {
-    console.log('Adding images...')
-    const days = await window.pictureDateChangerAPI.addNewImages()
-    console.info('New days', days)
-    setDays(days)
+
+  function handleAddMediaFilesClick() {
+    const addMediaPromise = uiIpcApi.addMedia().catch(err => {
+      console.error(err)
+      toast('Error adding media files', { type: 'error' })
+    })
+    setStatus('adding media...')
+    addMediaPromise.then(() => setStatus('idle'))
   }
 
-  function handleAddImagesClick() {
-    addImages().catch(console.error)
-  }
+  useEffect(() => {
+    onUiIpcApiEvent('mediaAdded', (e, newMedia) => {
+      const mediaWithDateTime = newMedia.filter(mediaFile => mediaFile.dateTime != null) as MediaFileWithDateTime[]
+      const newDays = mediaWithDateTime.reduce((days, mediaFile) => {
+        const date = dayjs(mediaFile.dateTime).format('YYYY-MM-DD')
+        const day = days[date] ?? []
+        day.push(mediaFile)
+        return { ...days, [date]: day}
+      }, days)
+      setDays(newDays)
+
+      const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
+      setMediaWithoutDateTime(mediaWithoutDateTime)
+    })
+  })
 
   return (
     <main className='relative h-full'>
+      <ToastContainer />
       <h1 className='text-3xl font-bold underline'>Picture Date Changer</h1>
-      {days.map(day =>
-        <DayRow key={day.date} day={day} />
+      {Object.entries(days).map(([date, mediaFiles]) =>
+        <DayRow key={date} date={date} mediaFiles={mediaFiles} />
       )}
       <Fab
         sx={{ position: 'absolute', bottom: '1rem', right: '1rem' }}
         color='primary'
-        onClick={handleAddImagesClick}>
+        onClick={handleAddMediaFilesClick}>
         <AddIcon fontSize='large' />
       </Fab>
     </main>
