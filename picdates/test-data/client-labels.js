@@ -1,4 +1,6 @@
-export const clientLabels = [
+import { parse } from "../dates.js";
+
+const clientLabels = [
     {
         // Ball
         date: "2019-03-17",
@@ -40,3 +42,12 @@ export const clientLabels = [
         ],
     }
 ]
+
+export const trueDates = {}
+clientLabels.forEach(day => {
+    day['filenames'].forEach(filename => {
+        trueDates[filename] = parse(day['date'], "YYYY-MM-DD")
+    })
+})
+
+export const labelledFilenames = Object.keys(trueDates)
