@@ -53,6 +53,8 @@
   },
   "dependencies": {
     "dayjs": "^1.11.7",
+    "markdown-table": "^3.0.3",
     "piexifjs": "^1.0.6"
-  }
+  },
+  "type": "module"
 }

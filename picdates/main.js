@@ -1,9 +1,10 @@
-const fs = require('fs')
-const path = require('path')
-const dayjs = require('dayjs')
-const customParseFormat = require('dayjs/plugin/customParseFormat')
+import fs from 'fs'
+import path from 'path'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
 dayjs.extend(customParseFormat)
-const piexif = require('piexifjs');
+import piexif from 'piexifjs'
+import {markdownTable} from 'markdown-table'
 
 const dir = "/mnt/c/Users/tfiers/Desktop/voorbeeld-fotos-client"
 const filenames = fs.readdirSync(dir)
@@ -48,14 +49,20 @@ const extractDates = (filepath) => {
 const filepaths = filenames.map(filename => path.join(dir, filename))
 const dateInfo = filepaths.map(extractDates)
 
-const prettify = (x) => {
+const toHumanString = (x) => {
     if (x instanceof dayjs) return x.format("YYYY-MM-DD")
+    if (x === null) return "(not found)"
     return x
 }
-applyToEntries = (f, obj) => Object.fromEntries(
+const applyToEntries = (f, obj) => Object.fromEntries(
     Object.entries(obj).map(([key, val]) => [key, f(val)])
 )
-prettifyEntries = (obj) => applyToEntries(prettify, obj)
-prettyDateInfo = dateInfo.map(prettifyEntries)
-json = JSON.stringify(prettyDateInfo, null, 4)
-fs.writeFileSync("picdates/output.json", json)
+const humanize = (obj) => applyToEntries(toHumanString, obj)
+const humanDateInfo = dateInfo.map(humanize)
+
+const header = Object.keys(humanDateInfo[0])
+const rows = [header, ...humanDateInfo.map(Object.values)]
+const md = markdownTable(rows)
+// json = JSON.stringify(humanDateInfo, null, 4)
+// fs.writeFileSync("picdates/output.json", json)
+fs.writeFileSync("picdates/output.md", md)
