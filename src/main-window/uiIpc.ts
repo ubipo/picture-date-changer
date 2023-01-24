@@ -19,4 +19,3 @@ export const onUiIpcApiEvent = <K extends keyof UiIpcApiEvents>(
 ) => {
     window.uiIpcApiOn(channel, handler as any)
 }
-

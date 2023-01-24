@@ -3,6 +3,7 @@ import { Days } from 'src/main-window/Days'
 import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '@mui/material'
 import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { MediaFile, MediaFileWithDateTime } from 'src/common/MediaFile';
 import { onUiIpcApiEvent, uiIpcApi } from './uiIpc';
 import dayjs from 'dayjs';
@@ -47,7 +48,7 @@ export default function PictureDateChanger() {
       const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
       setMediaWithoutDateTime(mediaWithoutDateTime)
     })
-  })
+  }, [])
 
   return (
     <main className='relative h-full'>

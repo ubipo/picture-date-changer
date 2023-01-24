@@ -5,7 +5,6 @@ import { registerUiIpcApi } from './uiIpc.js'
 const isDev = !app.isPackaged
 
 const createMainWindow = () => {
-    console.log('preload', path.join(__dirname, 'preload.js'))
     const window = new BrowserWindow({
         width: 800,
         height: 600,
