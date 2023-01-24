@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { extname, basename } from 'path'
 import piexif from 'piexifjs'
-import { parse } from './dates.js'
+import { parse } from './dates.mjs'
 
 
 /**

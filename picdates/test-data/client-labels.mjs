@@ -1,4 +1,4 @@
-import { parse } from "../dates.js";
+import { parse } from "../dates.mjs";
 
 const clientLabels = [
     {
