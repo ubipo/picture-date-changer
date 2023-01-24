@@ -1,5 +1,5 @@
 
-See [`testdata/output.md`](testdata/output.md)
+See [`test-data/output.md`](test-data/output.md)
 
 ## On Date parsing
 Built-in `Date` does not do arbitrary format parsing (at least not officially).\
