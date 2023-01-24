@@ -16,7 +16,7 @@
     "type-check": "tsc",
     "lint": "eslint . --ext js,jsx,ts,tsx",
     "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
-    "picdates-test": "node picdates/test-data/main.mjs"
+    "picdates-test": "node picdates/test/main.mjs"
   },
   "repository": {
     "type": "git",

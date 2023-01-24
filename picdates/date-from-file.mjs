@@ -3,14 +3,24 @@ import { extname, basename } from 'path'
 import piexif from 'piexifjs'
 import { parse } from './dates.mjs'
 
-
 /**
- * Given the path to a picture or movie file, try to extract the date it was taken
- * from the filename and, (for JPEG files only), the Exif metadata.
+ * Given the path to a picture or movie file, try to find the date it was taken.
  *
- * The values of the returned object are either a DayJS datetime object, or the
- * `NOTFOUND` string.
+ * If the file is a JPEG, look in the file's Exif metadata for the 'Date taken' attribute.
+ * If it is not a JPEG, or if that metadata is not found, look for a date in the filename.
+ * If that is not found either, return `null`. Else, return a 'dayjs' datetime object.
  */
+export const extractDate = (path) => {
+    if (isJPEG(path)) {
+        const date = dateFromExif(path)
+        if (date != NOTFOUND) return date
+    }
+    const filename = basename(path)
+    const date = dateFromFilename(filename)
+    if (date == NOTFOUND) return null
+    return date
+}
+
 export const extractDates = (path) => {
     const filename = basename(path)  // (includes extension)
     return {
@@ -18,7 +28,8 @@ export const extractDates = (path) => {
         dateFromExif: dateFromExif(path),
     }
 }
-export const NOTFOUND = "(not found)"
+
+const NOTFOUND = "(not found)"
 
 
 const dateFromFilename = (filename) => {

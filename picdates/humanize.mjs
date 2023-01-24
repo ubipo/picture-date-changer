@@ -13,7 +13,8 @@ export const camelCaseToSpaced = (str) =>
     str.replace(/([^A-Z])([A-Z])/g, "$1 $2").toLowerCase()
 
 const mapEntries = (obj, {keys = identity, vals = identity} = {}) => {
-    // Rename `keys` and `vals`, the functions transforming keys and values
+    // Rename the functions transforming keys and values, so it's more clear they're
+    // functions
     const [f, g] = [keys, vals]
     const transform = ([key, val]) => [f(key), g(val)]
     return Object.fromEntries(Object.entries(obj).map(transform))
