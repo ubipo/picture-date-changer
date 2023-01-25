@@ -20,5 +20,5 @@
     "outDir": "../../dist",
   },
   "exclude": ["node_modules"],
-  "include": ["**/*.ts", "**/*.tsx", "../common/**/*.ts", "../../picdates/**/*.mjs", "../main-window/Days.ts", "../../picdates/date-from-file.js", "../../picdates/dates.js", "../../picdates/humanize.js"]
+  "include": ["**/*.ts", "**/*.tsx", "../common/**/*.ts", "../../picdates/**/*.mjs", "../main-window/organizeMediaByDate.ts", "../../picdates/date-from-file.js", "../../picdates/dates.js", "../../picdates/humanize.js"]
 }

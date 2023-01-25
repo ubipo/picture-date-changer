@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { Days } from 'src/main-window/Days'
 import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '@mui/material'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MediaFile, MediaFileWithDateTime } from 'src/common/MediaFile';
 import { onUiIpcApiEvent, uiIpcApi } from './uiIpc';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import objectSupport from 'dayjs/plugin/objectSupport';
+import { organizeMediaByDate, YearMedia } from './organizeMediaByDate';
+dayjs.extend(objectSupport)
 
-function DayRow({ date, mediaFiles }: { date: string, mediaFiles: MediaFile[] }) {
-  return <div className='flex flex-col mb-2'>
-    <h2>{date}</h2>
+function DayRow({ date, mediaFiles }: { date: Dayjs, mediaFiles: MediaFile[] }) {
+  return <div className='flex flex-col mb-2 overflow-auto'>
+    <h4>{dayjs(date).format('ddd, DD MMM YYYY')}</h4>
     <div className='flex flex-row h-60'>
       {mediaFiles.map(mediaFiles =>
         <img className='h-full' key={mediaFiles.path} src={mediaFiles.dataUri} />
@@ -20,8 +22,8 @@ function DayRow({ date, mediaFiles }: { date: string, mediaFiles: MediaFile[] })
 }
 
 export default function PictureDateChanger() {
-  const [status, setStatus] = useState<string>('idle')
-  const [days, setDays] = useState<Days>({})
+  const [status, setStatus] = useState<string | null>(null)
+  const [yearsMedia, setYearsMedia] = useState<YearMedia[]>([])
   const [mediaWithoutDateTime, setMediaWithoutDateTime] = useState<MediaFile[]>([])
 
 
@@ -30,20 +32,14 @@ export default function PictureDateChanger() {
       console.error(err)
       toast('Error adding media files', { type: 'error' })
     })
-    setStatus('adding media...')
-    addMediaPromise.then(() => setStatus('idle'))
+    setStatus('Adding media...')
+    addMediaPromise.then(() => setStatus(null))
   }
 
   useEffect(() => {
     onUiIpcApiEvent('mediaAdded', (e, newMedia) => {
       const mediaWithDateTime = newMedia.filter(mediaFile => mediaFile.dateTime != null) as MediaFileWithDateTime[]
-      const newDays = mediaWithDateTime.reduce((days, mediaFile) => {
-        const date = dayjs(mediaFile.dateTime).format('YYYY-MM-DD')
-        const day = days[date] ?? []
-        day.push(mediaFile)
-        return { ...days, [date]: day}
-      }, days)
-      setDays(newDays)
+      setYearsMedia(organizeMediaByDate(mediaWithDateTime))
 
       const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
       setMediaWithoutDateTime(mediaWithoutDateTime)
@@ -53,12 +49,35 @@ export default function PictureDateChanger() {
   return (
     <main className='relative h-full'>
       <ToastContainer />
-      <h1 className='text-3xl font-bold underline'>Picture Date Changer</h1>
-      {Object.entries(days).map(([date, mediaFiles]) =>
-        <DayRow key={date} date={date} mediaFiles={mediaFiles} />
-      )}
+      <div className='flex flex-col h-full'>
+        <div className='flex flex-row grow'>
+          <section className='flex flex-row flex-wrap'>
+            {mediaWithoutDateTime.map(mediaFile =>
+              <img className='h-60' key={mediaFile.path} src={mediaFile.dataUri} />
+            )}
+          </section>
+          <section className='m-2 mr-0'>
+            {yearsMedia.map(({ year, months }) =>
+              <section key={year}>
+                <h2>{year}</h2>
+                {months.map(({ month, days }) =>
+                  <section key={month}>
+                    <h3>{dayjs({ month }).format('MMMM')}</h3>
+                    {days.map(({ day, media }) =>
+                      <DayRow key={day}
+                              date={dayjs({ year, month, day })}
+                              mediaFiles={media} />
+                    )}
+                  </section>
+                )}
+              </section>
+            )}
+          </section>
+        </div>
+        {status && <section className='bg-slate-600 text-white p-[0.25em]'>{status}</section>}
+      </div>
       <Fab
-        sx={{ position: 'absolute', bottom: '1rem', right: '1rem' }}
+        sx={{ position: 'fixed', bottom: '1rem', right: '1rem' }}
         color='primary'
         onClick={handleAddMediaFilesClick}>
         <AddIcon fontSize='large' />
