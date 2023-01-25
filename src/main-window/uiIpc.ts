@@ -1,21 +1,26 @@
+import { IpcMainEvent } from "electron";
 import type { UiIpcApi, UiIpcApiEvents } from "src/electron/uiIpc"
 
 declare global {
     interface Window {
-        uiIpcApiInvoke: (channel: string, ...args: any[]) => any,
-        uiIpcApiOn: (channel: string, listener: (...args: any[]) => void) => void,
+        uiIpcApi: UiIpcApi,
+        uiIpcApiInvoke: (channel: string, args: any[]) => any,
+        onUiIpcApiEvent: <K extends keyof UiIpcApiEvents>(
+            channel: K,
+            listener: (
+                e: IpcMainEvent,
+                ...args: Parameters<UiIpcApiEvents[K]>
+            ) => void
+        ) => void,
     }
 }
 
-export const uiIpcApi = new Proxy({}, {
-    get: (target, prop) => (...args: any[]) => {
-        return window.uiIpcApiInvoke(prop.toString(), ...args)
-    }
-}) as UiIpcApi
-
-export const onUiIpcApiEvent = <K extends keyof UiIpcApiEvents>(
-    channel: K,
-    handler: (e: Electron.IpcRendererEvent, ...args: Parameters<UiIpcApiEvents[K]>) => void
-) => {
-    window.uiIpcApiOn(channel, handler as any)
+export const registerUiIpcApi = () => {
+    // This proxy object cannot be exposed in the preload script, because it cannot
+    // be serialized. 
+    window.uiIpcApi = new Proxy({}, {
+        get: (_target, prop) => (
+            ...args: any[]
+        ) =>  window.uiIpcApiInvoke(prop.toString(), args)
+    }) as UiIpcApi
 }

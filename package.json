@@ -64,6 +64,7 @@
     "markdown-table": "^3.0.3",
     "piexifjs": "^1.0.6",
     "react-toastify": "^9.1.1",
+    "react-top-loading-bar": "^2.3.1",
     "ts-transformer-keys": "^0.4.4"
   }
 }
