@@ -22,6 +22,7 @@ export default function PictureDateChanger() {
       loadingBar.current?.continuousStart()
     })
     listenToHost('mediaLoadingComplete', ({ newMedia }) => {
+      console.log('Media loading complete', newMedia)
       const mediaWithDateTime = newMedia.filter(media => media.dateTime != null) as MediaWithDateTime[]
       setYearsMedia(organizeMediaByDate(mediaWithDateTime))
 
@@ -47,7 +48,10 @@ export default function PictureDateChanger() {
         <div className='flex flex-row grow'>
           <section className='flex flex-row flex-wrap'>
             {mediaWithoutDateTime.map(mediaFile =>
-              <img className='h-60' key={mediaFile.path} src={mediaFile.dataUri} />
+              <div className='h-60 w-60 bg-gray-400 m-1' key={mediaFile.path}>
+                <p className='text-center'>{mediaFile.path}</p>
+              </div>
+              // <img className='h-60' key={mediaFile.path} src={mediaFile.dataUri} />
             )}
           </section>
           { yearsMedia.length > 0

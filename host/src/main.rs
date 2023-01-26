@@ -20,13 +20,23 @@ fn main() {
 
     tauri::Builder::default()
         .setup(|app| {
-            app.listen_global("host-ui-bridge", |event| {
+            let app_handle = app.handle();
+            app.listen_global("host-ui-bridge",  move |event| {
+                let second_handle = app_handle.clone();
                 let event_payload_str = event.payload().expect("Event must have a payload");
                 let message = serde_json::from_str::<host_ui_bridge::MessageToHost>(event_payload_str).unwrap();
                 match message {
                     host_ui_bridge::MessageToHost::AddMedia => {
                         println!("AddMedia");
-                        load_media::load_images_with_file_picker();
+                        tokio::spawn(async move {
+                            let media = match load_media::load_images_with_file_picker().await {
+                                Some(media) => media,
+                                None => return,
+                            };
+                            let payload = host_ui_bridge::MediaLoadingCompletePayload { new_media: media };
+                            let message = host_ui_bridge::MessageToUi::MediaLoadingComplete { payload };
+                            second_handle.emit_all(&"host-ui-bridge", message).unwrap();
+                        });
                     },
                     host_ui_bridge::MessageToHost::ChangeMediaDateTime {
                         payload: host_ui_bridge::ChangeMediaDateTimePayload {

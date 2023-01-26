@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use tauri::api::dialog::FileDialogBuilder;
+use tokio::sync::oneshot;
 use walkdir::WalkDir;
 
 use crate::host_ui_bridge::Media;
@@ -28,15 +29,17 @@ fn path_to_media(path: PathBuf) -> Media {
     }
 }
 
-pub fn load_images_with_file_picker() -> Vec<Media> {
+pub async fn load_images_with_file_picker() -> Option<Vec<Media>> {
+    let (media_tx, media_rx) = oneshot::channel();
     FileDialogBuilder::new().pick_folders(|file_paths| {
         match file_paths {
             Some(file_paths) => {
                 let file_paths = path_vec_to_recursive_file_paths(file_paths);
                 let media = file_paths.into_iter().map(path_to_media).collect::<Vec<Media>>();
+                media_tx.send(Some(media)).unwrap();
             },
-            None => {},
+            None => media_tx.send(None).unwrap(),
         }
     });
-    Vec::new()
+    media_rx.await.unwrap()
 }
