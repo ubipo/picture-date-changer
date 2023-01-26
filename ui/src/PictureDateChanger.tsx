@@ -3,40 +3,40 @@ import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '@mui/material'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { MediaFile, MediaFileWithDateTime } from './MediaFile.js';
 import { organizeMediaByDate, YearMedia } from './organizeMediaByDate';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 import YearsScrollView from './components/YearsScrollView';
-import { emitToHost } from './host-ui-bridge/index.js';
+import { emitToHost, listenToHost } from './host-ui-bridge/index.js';
+import { Media } from './host-ui-bridge/generated-bindings';
+import { MediaWithDateTime } from './host-ui-bridge/extra-types.js';
 
 export default function PictureDateChanger() {
   const loadingBar = useRef<LoadingBarRef>(null)
   const [status, setStatus] = useState<string | null>(null)
   const [yearsMedia, setYearsMedia] = useState<YearMedia[]>([])
-  const [mediaWithoutDateTime, setMediaWithoutDateTime] = useState<MediaFile[]>([])
+  const [mediaWithoutDateTime, setMediaWithoutDateTime] = useState<Media[]>([])
 
   useEffect(() => {
-    // listenToHost('mediaLoading', () => {
-    //   setStatus('Loading media...')
-    //   loadingBar.current?.continuousStart()
-    // })
-    // listenToHost('mediaLoadingComplete', payload => {
-    //   payload.kind
-    //   const mediaWithDateTime = newMedia.filter(mediaFile => mediaFile.dateTime != null) as MediaFileWithDateTime[]
-    //   setYearsMedia(organizeMediaByDate(mediaWithDateTime))
+    listenToHost('mediaLoading', () => {
+      setStatus('Loading media...')
+      loadingBar.current?.continuousStart()
+    })
+    listenToHost('mediaLoadingComplete', ({ newMedia }) => {
+      const mediaWithDateTime = newMedia.filter(media => media.dateTime != null) as MediaWithDateTime[]
+      setYearsMedia(organizeMediaByDate(mediaWithDateTime))
 
-    //   const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
-    //   setMediaWithoutDateTime(mediaWithoutDateTime)
+      const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
+      setMediaWithoutDateTime(mediaWithoutDateTime)
 
-    //   setStatus(null)
-    //   loadingBar.current?.complete()
-    // })
-    // listenToHost('mediaLoadingError', (e, message) => {
-    //   setStatus(null)
-    //   loadingBar.current?.complete()
-    //   console.error('Error loading media files', message)
-    //   toast('Error loading media files', { type: 'error' })
-    // })
+      setStatus(null)
+      loadingBar.current?.complete()
+    })
+    listenToHost('mediaLoadingError', ({ message }) => {
+      setStatus(null)
+      loadingBar.current?.complete()
+      console.error('Error loading media files', message)
+      toast('Error loading media files', { type: 'error' })
+    })
   }, [])
 
   return (

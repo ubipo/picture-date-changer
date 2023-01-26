@@ -4,14 +4,9 @@
 )]
 
 mod host_ui_bridge;
+mod load_media;
 
 use tauri::Manager;
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: String) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 fn main() {
     // let file = "/data/photo/egypt-2010-04/CSC_8249.JPG";
@@ -26,13 +21,19 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             app.listen_global("host-ui-bridge", |event| {
-                let payload_str = event.payload().unwrap();
-                let payload = serde_json::from_str::<host_ui_bridge::MessageToHost>(payload_str).unwrap();
-                match payload {
+                let event_payload_str = event.payload().expect("Event must have a payload");
+                let message = serde_json::from_str::<host_ui_bridge::MessageToHost>(event_payload_str).unwrap();
+                match message {
                     host_ui_bridge::MessageToHost::AddMedia => {
                         println!("AddMedia");
+                        load_media::load_images_with_file_picker();
                     },
-                    host_ui_bridge::MessageToHost::ChangeMediaDateTime { path, new_date_time } => {
+                    host_ui_bridge::MessageToHost::ChangeMediaDateTime {
+                        payload: host_ui_bridge::ChangeMediaDateTimePayload {
+                            path,
+                            new_date_time,
+                        }
+                     } => {
                         println!("ChangeMediaDateTime ffsdsadf");
                         // println!("ChangeMediaDateTime: path: {:?}, new_date_time: {:?}", path, new_date_time);
                         // let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
@@ -55,7 +56,6 @@ fn main() {
             // }).unwrap();
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -1,24 +1,28 @@
 import { emit, listen } from '@tauri-apps/api/event'
 import { MessageToHost, MessageToUi } from './generated-bindings'
 
-// type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+type MessageToHostPayload<Kind> = Extract<MessageToHost, { kind: Kind }> extends { payload: infer Payload } ? Payload : never
+type MessageToUiPayload<Kind> = Extract<MessageToUi, { kind: Kind }> extends { payload: infer Payload } ? Payload : never
 
-export const emitToHost = <M extends MessageToHost>(
-    kind: M['kind'],
-    ...payload: keyof Omit<M, 'kind'> extends never ? [] : [Omit<M, 'kind'>]
-) => emit('host-ui-bridge', {
-    kind,
-    ...payload
+export const emitToHost = <
+    Message extends MessageToHost,
+    Kind extends Message['kind'],
+    Payload extends MessageToHostPayload<Kind>
+>(
+    kind: Kind,
+    ...payload: Payload extends never ? [] : [Payload]
+) => emit('host-ui-bridge', { kind, payload: payload[0] })
+
+export const listenToHost = <
+    Message extends MessageToUi,
+    Kind extends Message['kind'],
+    Payload extends MessageToUiPayload<Kind>
+>(
+    kind: Kind,
+    callback: (payload: Payload) => void
+) => listen('host-ui-bridge', e => {
+    const message = e.payload as MessageToUi
+    if (message.kind === kind) {
+        callback((message as any).payload)
+    }
 })
-
-// export const listenToHost = <M extends MessageToUi>(
-//     kind: M['kind'],
-//     callback: (payload: M) => void
-// ) => listen('host-ui-bridge', e => {
-//     const message = e.payload as M
-//     if (message.kind === kind) {
-//         const messageWithoutKind = message as PartialBy<M, 'kind'>
-//         delete messageWithoutKind.kind
-//         callback(messageWithoutKind as M)
-//     }
-// })

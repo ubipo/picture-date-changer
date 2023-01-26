@@ -18,20 +18,32 @@ macro_rules! bridge_items {
 bridge_items! (
     pub struct Media {
         pub path: String,
-        pub date_time: String,
-        pub data_uri: String,
+        pub date_time: Option<String>,
+    },
+
+    pub struct ChangeMediaDateTimePayload {
+        pub path: String,
+        pub new_date_time: String,
     },
 
     #[serde(tag = "kind")]
     pub enum MessageToHost {
         AddMedia,
-        ChangeMediaDateTime { path: String, new_date_time: String },
+        ChangeMediaDateTime { payload: ChangeMediaDateTimePayload },
+    },
+
+    pub struct MediaLoadingCompletePayload {
+        pub new_media: Vec<Media>,
+    },
+
+    pub struct MediaLoadingErrorPayload {
+        pub error: String,
     },
 
     #[serde(tag = "kind")]
     pub enum MessageToUi {
         MediaLoading,
-        MediaLoadingComplete { new_media: Vec<Media> },
-        MediaLoadingError,
+        MediaLoadingComplete { payload: MediaLoadingCompletePayload },
+        MediaLoadingError { error: MediaLoadingErrorPayload },
     }
 );
