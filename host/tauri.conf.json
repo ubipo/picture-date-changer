@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/tooling/cli/schema.json",
   "build": {
-    "beforeDevCommand": "( ./src-tauri/generate-bindings.sh && cd src-ui/ && npm run dev )",
-    "beforeBuildCommand": "( ./src-tauri/generate-bindings.sh && cd src-ui/ && npm run build )",
+    "beforeDevCommand": "( ./host/generate_bindings.py && cd ui/ && npm run dev )",
+    "beforeBuildCommand": "( ./host/generate_bindings.py && cd ui/ && npm run build )",
     "devPath": "http://localhost:5173",
-    "distDir": "../src-ui/dist",
+    "distDir": "../ui/dist",
     "withGlobalTauri": true
   },
   "package": {

@@ -27,12 +27,12 @@ fn main() {
         .setup(|app| {
             app.listen_global("host-ui-bridge", |event| {
                 let payload_str = event.payload().unwrap();
-                let payload = serde_json::from_str::<host_ui_bridge::ToHostMessage>(payload_str).unwrap();
+                let payload = serde_json::from_str::<host_ui_bridge::MessageToHost>(payload_str).unwrap();
                 match payload {
-                    host_ui_bridge::ToHostMessage::AddMedia => {
+                    host_ui_bridge::MessageToHost::AddMedia => {
                         println!("AddMedia");
                     },
-                    host_ui_bridge::ToHostMessage::ChangeMediaDateTime { path, new_date_time } => {
+                    host_ui_bridge::MessageToHost::ChangeMediaDateTime { path, new_date_time } => {
                         println!("ChangeMediaDateTime ffsdsadf");
                         // println!("ChangeMediaDateTime: path: {:?}, new_date_time: {:?}", path, new_date_time);
                         // let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
