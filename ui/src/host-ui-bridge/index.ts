@@ -10,16 +10,20 @@ class HostUiBridge {
     kindListeners: {
         [kind in MessageToUi['kind']]?: ((payload: MessageToUiPayload<kind>) => void)[]
     } = {}
-    bridgeListenerRemover: UnlistenFn | null = null
+    bridgeListenerRemoverPromise: Promise<UnlistenFn> | null = null
 
     private async addBridgeListenerIfNecessary() {
-        if (this.bridgeListenerRemover != null) return
-        this.bridgeListenerRemover = await listen(HostUiBridge.EVENT_NAME, e => {
-            const message = e.payload as MessageToUi
-            const listeners = this.kindListeners[message.kind]
-            if (listeners == null) return
-            listeners.forEach(l => l((message as any).payload as never))
-        })
+        if (this.bridgeListenerRemoverPromise != null) return
+        this.bridgeListenerRemoverPromise = listen(
+            HostUiBridge.RX_EVENT_NAME,
+            e => {
+                const message = e.payload as MessageToUi
+                const listeners = this.kindListeners[message.kind]
+                if (listeners == null) return
+                listeners.forEach(l => l((message as any).payload as never))
+            }
+        )
+        await this.bridgeListenerRemoverPromise
     }
 
     emit<
@@ -30,7 +34,7 @@ class HostUiBridge {
         kind: Kind,
         ...payload: Payload extends never ? [] : [Payload]
     ) {
-        emit(HostUiBridge.EVENT_NAME, { kind, payload: payload[0] })
+        emit(HostUiBridge.TX_EVENT_NAME, { kind, payload: payload[0] })
     }
 
     async addListener<
@@ -54,7 +58,11 @@ class HostUiBridge {
 
     on = this.addListener
 
-    private static EVENT_NAME = 'host-ui-bridge'
+    // The event names need to be different for the two directions because 
+    // Tauri echoes events back to the sender, and we don't want to receive
+    // our own messages.
+    private static TX_EVENT_NAME = 'host-ui-bridge-ui-to-host'
+    private static RX_EVENT_NAME = 'host-ui-bridge-host-to-ui'
 }
 
 export const hostUiBridge = new HostUiBridge()

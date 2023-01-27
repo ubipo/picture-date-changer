@@ -5,7 +5,7 @@ import DayRow from "./DayRow";
 export default function YearsScrollView(
     { yearsMedia }: { yearsMedia: YearMedia[]}
 ) {
-    return <section className='m-2 mr-0'>
+    return <section className='p-2 mr-0'>
         {yearsMedia.map(({ year, months }) =>
             <section key={year}>
                 <h2>{year}</h2>

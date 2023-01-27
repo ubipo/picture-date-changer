@@ -1,7 +1,9 @@
+use tauri::{AppHandle, Manager};
 use ts_rs::TS;
 use serde::{Serialize, Deserialize};
 
-pub const EVENT_NAME: &str = "host-ui-bridge";
+pub const RX_EVENT_NAME: &str = "host-ui-bridge-ui-to-host";
+pub const TX_EVENT_NAME: &str = "host-ui-bridge-host-to-ui";
 
 macro_rules! bridge_items {
     ($struct:item) => {
@@ -70,3 +72,15 @@ bridge_items! (
         MediaPreviewLoadError { payload: MediaPreviewLoadErrorPayload },
     }
 );
+
+pub trait ToUiSender {
+    fn send_to_ui(&self, message: MessageToUi);
+}
+
+impl ToUiSender for AppHandle {
+    fn send_to_ui(&self, message: MessageToUi) {
+        self.emit_all(TX_EVENT_NAME, message).unwrap_or_else(|err| {
+            eprintln!("Error sending message to UI: {:?}", err);
+        });
+    }
+}

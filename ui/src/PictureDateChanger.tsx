@@ -18,26 +18,32 @@ export default function PictureDateChanger() {
   const [mediaWithoutDateTime, setMediaWithoutDateTime] = useState<Media[]>([])
 
   useEffect(() => {
-    hostUiBridge.on('mediaLoading', () => {
-      setStatus('Loading media...')
-      loadingBar.current?.continuousStart()
-    })
-    hostUiBridge.on('mediaLoadingComplete', ({ newMedia }) => {
-      const mediaWithDateTime = newMedia.filter(media => media.dateTime != null) as MediaWithDateTime[]
-      setYearsMedia(organizeMediaByDate(mediaWithDateTime))
+    const listenerPromises = [
+      hostUiBridge.on('mediaLoading', () => {
+        setStatus('Loading media...')
+        loadingBar.current?.continuousStart()
+      }),
+      hostUiBridge.on('mediaLoadingComplete', ({ newMedia }) => {
+        console.log('Media loading complete', newMedia)
+        const mediaWithDateTime = newMedia.filter(media => media.dateTime != null) as MediaWithDateTime[]
+        setYearsMedia(organizeMediaByDate(mediaWithDateTime))
 
-      const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
-      setMediaWithoutDateTime(mediaWithoutDateTime)
+        const mediaWithoutDateTime = newMedia.filter(mediaFile => mediaFile.dateTime == null)
+        setMediaWithoutDateTime(mediaWithoutDateTime)
 
-      setStatus(null)
-      loadingBar.current?.complete()
-    })
-    hostUiBridge.on('mediaLoadingError', ({ message }) => {
-      setStatus(null)
-      loadingBar.current?.complete()
-      console.error('Error loading media files', message)
-      toast('Error loading media files', { type: 'error' })
-    })
+        setStatus(null)
+        loadingBar.current?.complete()
+      }),
+      hostUiBridge.on('mediaLoadingError', ({ message }) => {
+        setStatus(null)
+        loadingBar.current?.complete()
+        console.error('Error loading media files', message)
+        toast('Error loading media files', { type: 'error' })
+      })
+    ]
+    return () => {
+      listenerPromises.forEach(promise => promise.then(remover => remover()))
+    }
   }, [])
 
   return (
@@ -55,7 +61,7 @@ export default function PictureDateChanger() {
                 )}
               </section>
               { yearsMedia.length > 0
-                ? <YearsScrollView yearsMedia={yearsMedia} />
+                ? <div><YearsScrollView yearsMedia={yearsMedia} /></div>
                 : <div className='flex-grow flex flex-col justify-center items-center'>
                     <h2 className='text-4xl text-center'>No media files with date/time</h2>
                   </div>

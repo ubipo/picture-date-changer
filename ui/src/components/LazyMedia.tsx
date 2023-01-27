@@ -9,6 +9,7 @@ export default function LazyMedia(
     const [dataUri, setDataUri] = useState<string | null>(null)
 
     useEffect(() => {
+        console.log('Loading lazy media...')
         const removerPromise = hostUiBridge.on(
             'mediaPreviewLoaded',
             ({ path, dataUri }) => {
@@ -22,9 +23,10 @@ export default function LazyMedia(
         return () => { removerPromise.then(remover => remover()) }
     }, [])
 
-    return dataUri == null
-        ? <div className="h-full aspect-square">
+    return <div className="inline-block h-full bg-slate-100">{ dataUri == null
+        ? <div className="h-full aspect-square flex justify-center items-center">
             <CircularProgress />
         </div>
-        : <img className="h-full" src={dataUri} />
+        : <img className="h-full inline-block" src={dataUri} />
+    }</div>
 }

@@ -1,10 +1,13 @@
-use tauri::{AppHandle, Manager};
+use std::time::Duration;
+
+use tauri::{AppHandle};
+use tokio::time::sleep;
 
 use crate::{
     host_ui_bridge::{
-        MessageToHost, MediaLoadingCompletePayload, MessageToUi, ChangeMediaDateTimePayload, LoadMediaPreviewPayload, MediaPreviewLoadedPayload, MediaPreviewLoadErrorPayload, EVENT_NAME
+        MessageToHost, MediaLoadingCompletePayload, MessageToUi, ChangeMediaDateTimePayload, LoadMediaPreviewPayload, MediaPreviewLoadedPayload, MediaPreviewLoadErrorPayload, Media, ToUiSender
     },
-    load_media::{load_media_with_file_picker, load_media_preview_data_uri}
+    load_media::{load_media_preview_data_uri, pick_folders, path_to_media, recursively_find_file_paths}
 };
 
 pub fn handle_message_to_host(
@@ -15,13 +18,16 @@ pub fn handle_message_to_host(
         MessageToHost::AddMedia => {
             let cloned_handle = app_handle.clone();
             tokio::spawn(async move {
-                let media = match load_media_with_file_picker().await {
+                let folder_paths = match pick_folders().await {
                     Some(media) => media,
                     None => return,
                 };
-                let payload = MediaLoadingCompletePayload { new_media: media };
-                let message = MessageToUi::MediaLoadingComplete { payload };
-                cloned_handle.emit_all(EVENT_NAME, message).unwrap();
+                cloned_handle.send_to_ui(MessageToUi::MediaLoading);
+                let media_paths = recursively_find_file_paths(folder_paths);
+                let media = media_paths.into_iter().map(path_to_media).collect::<Vec<Media>>();
+                cloned_handle.send_to_ui(MessageToUi::MediaLoadingComplete { 
+                    payload: MediaLoadingCompletePayload { new_media: media }
+                });
             });
         },
         MessageToHost::ChangeMediaDateTime {
@@ -44,6 +50,7 @@ pub fn handle_message_to_host(
         } => {
             let cloned_handle = app_handle.clone();
             tokio::spawn(async move {
+                sleep(Duration::from_millis(10000)).await;
                 let message = match load_media_preview_data_uri(&path).await {
                     Ok(data_uri) => MessageToUi::MediaPreviewLoaded {
                         payload: MediaPreviewLoadedPayload { path, data_uri }
@@ -52,7 +59,7 @@ pub fn handle_message_to_host(
                         payload: MediaPreviewLoadErrorPayload { path, error: err }
                     }
                 };
-                cloned_handle.emit_all(EVENT_NAME, message).unwrap();
+                cloned_handle.send_to_ui(message);
             });
         },
     }

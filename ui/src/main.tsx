@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import PictureDateChanger from './PictureDateChanger.js'
 import './main.scss'
@@ -9,6 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
   ReactDOM.createRoot(appElement).render(
     <React.StrictMode>
       <PictureDateChanger />
-    </React.StrictMode>,
+    </React.StrictMode>
   )
 })
