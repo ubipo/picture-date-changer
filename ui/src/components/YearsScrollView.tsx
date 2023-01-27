@@ -11,11 +11,11 @@ export default function YearsScrollView(
                 <h2>{year}</h2>
                 {months.map(({ month, days }) =>
                     <section key={month}>
-                        <h3>{PlainYearMonth.from({ year, month }).toLocaleString()}</h3>
-                        {days.map(({ day, media }) =>
+                        <h3>{PlainYearMonth.from({ year, month }).toLocaleString(undefined, { calendar: 'iso8601' })}</h3>
+                        {days.map(({ day, medias }) =>
                             <DayRow key={day}
                                     date={PlainDate.from({ year, month, day })}
-                                    mediaFiles={media} />
+                                    medias={medias} />
                         )}
                     </section>
                 )}

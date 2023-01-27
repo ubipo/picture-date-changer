@@ -24,7 +24,11 @@ walkdir = "2.3.2"
 mime = "0.3.16"
 mime_guess = "2.0.4"
 futures = "0.3.25"
-tokio = { version = "1.24.2", features = ["macros"] }
+tokio = { version = "1.24.2", features = ["macros", "fs"] }
+base64 = "0.21.0"
+regex = "1.7.1"
+lazy_static = "1.4.0"
+chrono = "0.4.23"
 
 [features]
 # by default Tauri runs in production mode

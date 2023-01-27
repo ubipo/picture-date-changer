@@ -5,8 +5,11 @@
 
 mod host_ui_bridge;
 mod load_media;
+mod handle_message_to_host;
+mod media_datetime;
 
 use tauri::Manager;
+use crate::handle_message_to_host::handle_message_to_host;
 
 fn main() {
     // let file = "/data/photo/egypt-2010-04/CSC_8249.JPG";
@@ -24,36 +27,8 @@ fn main() {
             app.listen_global("host-ui-bridge",  move |event| {
                 let second_handle = app_handle.clone();
                 let event_payload_str = event.payload().expect("Event must have a payload");
-                let message = serde_json::from_str::<host_ui_bridge::MessageToHost>(event_payload_str).unwrap();
-                match message {
-                    host_ui_bridge::MessageToHost::AddMedia => {
-                        println!("AddMedia");
-                        tokio::spawn(async move {
-                            let media = match load_media::load_images_with_file_picker().await {
-                                Some(media) => media,
-                                None => return,
-                            };
-                            let payload = host_ui_bridge::MediaLoadingCompletePayload { new_media: media };
-                            let message = host_ui_bridge::MessageToUi::MediaLoadingComplete { payload };
-                            second_handle.emit_all(&"host-ui-bridge", message).unwrap();
-                        });
-                    },
-                    host_ui_bridge::MessageToHost::ChangeMediaDateTime {
-                        payload: host_ui_bridge::ChangeMediaDateTimePayload {
-                            path,
-                            new_date_time,
-                        }
-                     } => {
-                        println!("ChangeMediaDateTime ffsdsadf");
-                        // println!("ChangeMediaDateTime: path: {:?}, new_date_time: {:?}", path, new_date_time);
-                        // let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
-                        // let tag = "Exif.Image.DateTime";
-                        // let previous_date_time = meta.get_tag_string(tag).unwrap();
-                        // println!("previous_date_time: {:?}, new_date_time: {:?}", previous_date_time, new_date_time);
-                        // meta.set_tag_string(tag, &new_date_time).unwrap();
-                        // meta.save_to_file(&path).unwrap();
-                    },
-                }
+                let message = serde_json::from_str::<host_ui_bridge::MessageToHost>(event_payload_str).expect("Event payload must be a MessageToHost");
+                handle_message_to_host(&second_handle, message);
             });
             // app.listen_global("aaa", |event| {
             //     event.payload().unwrap()

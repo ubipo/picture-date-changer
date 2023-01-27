@@ -6,9 +6,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { organizeMediaByDate, YearMedia } from './organizeMediaByDate';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 import YearsScrollView from './components/YearsScrollView';
-import { emitToHost, listenToHost } from './host-ui-bridge/index.js';
+import { hostUiBridge } from './host-ui-bridge/index.js';
 import { Media } from './host-ui-bridge/generated-bindings';
 import { MediaWithDateTime } from './host-ui-bridge/extra-types.js';
+import LazyMedia from './components/LazyMedia';
 
 export default function PictureDateChanger() {
   const loadingBar = useRef<LoadingBarRef>(null)
@@ -17,12 +18,11 @@ export default function PictureDateChanger() {
   const [mediaWithoutDateTime, setMediaWithoutDateTime] = useState<Media[]>([])
 
   useEffect(() => {
-    listenToHost('mediaLoading', () => {
+    hostUiBridge.on('mediaLoading', () => {
       setStatus('Loading media...')
       loadingBar.current?.continuousStart()
     })
-    listenToHost('mediaLoadingComplete', ({ newMedia }) => {
-      console.log('Media loading complete', newMedia)
+    hostUiBridge.on('mediaLoadingComplete', ({ newMedia }) => {
       const mediaWithDateTime = newMedia.filter(media => media.dateTime != null) as MediaWithDateTime[]
       setYearsMedia(organizeMediaByDate(mediaWithDateTime))
 
@@ -32,7 +32,7 @@ export default function PictureDateChanger() {
       setStatus(null)
       loadingBar.current?.complete()
     })
-    listenToHost('mediaLoadingError', ({ message }) => {
+    hostUiBridge.on('mediaLoadingError', ({ message }) => {
       setStatus(null)
       loadingBar.current?.complete()
       console.error('Error loading media files', message)
@@ -45,29 +45,34 @@ export default function PictureDateChanger() {
       <ToastContainer />
       <LoadingBar color='#f11946' ref={loadingBar} />
       <div className='flex flex-col h-full'>
-        <div className='flex flex-row grow'>
-          <section className='flex flex-row flex-wrap'>
-            {mediaWithoutDateTime.map(mediaFile =>
-              <div className='h-60 w-60 bg-gray-400 m-1' key={mediaFile.path}>
-                <p className='text-center'>{mediaFile.path}</p>
-              </div>
-              // <img className='h-60' key={mediaFile.path} src={mediaFile.dataUri} />
-            )}
-          </section>
-          { yearsMedia.length > 0
-            ? <YearsScrollView yearsMedia={yearsMedia} />
-            : <div className='flex-grow flex flex-col justify-center items-center'>
-                <h1 className='text-4xl'>No media files</h1>
-                <p className='text-xl'>Click the + button below to add media files</p>
-              </div>
-          }
-        </div>
+        { yearsMedia.length > 0 || mediaWithoutDateTime.length > 0
+          ? <div className='flex flex-row grow h-full'>
+              <section className='flex flex-col overflow-auto h-full'>
+                {mediaWithoutDateTime.map(mediaFile =>
+                  <div className='h-60 flex justify-center' key={mediaFile.path}>
+                    <LazyMedia media={mediaFile} />
+                  </div>
+                )}
+              </section>
+              { yearsMedia.length > 0
+                ? <YearsScrollView yearsMedia={yearsMedia} />
+                : <div className='flex-grow flex flex-col justify-center items-center'>
+                    <h2 className='text-4xl text-center'>No media files with date/time</h2>
+                  </div>
+              }
+            </div>
+          : <div className='flex-grow flex flex-col justify-center items-center'>
+              <h2 className='text-4xl text-center'>No media files</h2>
+              <p className='text-xl text-center'>Click the + button below to add media files</p>
+            </div>
+        }
+        
         {status && <section className='bg-slate-600 text-white p-[0.25em]'>{status}</section>}
       </div>
       <Fab
         sx={{ position: 'fixed', bottom: '1rem', right: '1rem' }}
         color='primary'
-        onClick={() => emitToHost('addMedia')}>
+        onClick={() => hostUiBridge.emit('addMedia')}>
         <AddIcon fontSize='large' />
       </Fab>
     </main>
