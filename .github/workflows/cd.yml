@@ -8,6 +8,9 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
 
+env:
+  IMAGE_MAGICK_VERSION: 7.1.0-58
+
 jobs:
   release:
     strategy:
@@ -31,7 +34,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev \
             libayatana-appindicator3-dev librsvg2-dev \
-            libgexiv2-dev libmagickwand-dev
+            libx11-dev libxext-dev zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev\
+            libgexiv2-dev
+
+      - name: Install ImageMagick 7 (Ubuntu only)
+        if: matrix.platform == 'ubuntu-20.04'
+        run: |
+          wget -O ImageMagick-7.tar.gz \
+            "https://download.imagemagick.org/archive/ImageMagick-$IMAGE_MAGICK_VERSION.tar.gz"
+          tar -xvf ImageMagick-7.tar.gz
+          cd ImageMagick-7
+          ./configure
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig /usr/local/lib
+          echo "Version: $(magick -version)"
 
       - name: Install dependencies (Windows only)
         if: matrix.platform == 'windows-latest'
@@ -49,7 +66,7 @@ jobs:
       - name: Test(Windows only)
         run: |
           echo $PKG_CONFIG_PATH
-          tree C:\msys64\mingw64\lib\pkgconfig
+          tree 'C:\msys64'
           
       - name: Python setup
         uses: actions/setup-python@v4
