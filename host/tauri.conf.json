@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/tooling/cli/schema.json",
   "build": {
-    "beforeDevCommand": "( ./host/generate_bindings.py && cd ui/ && npm run dev )",
-    "beforeBuildCommand": "( ./host/generate_bindings.py && cd ui/ && npm run build )",
+    "beforeDevCommand": "( python3 host/generate_bindings.py && cd ui/ && npm run dev )",
+    "beforeBuildCommand": "( python3 check_versions.py && python3 host/generate_bindings.py && cd ui/ && npm run build )",
     "devPath": "http://localhost:5173",
     "distDir": "../ui/dist",
     "withGlobalTauri": true

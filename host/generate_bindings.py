@@ -7,6 +7,7 @@ BINDINGS_DIR = "bindings"
 OUTPUT_PATH = "../ui/src/host-ui-bridge/generated-bindings.d.ts"
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 cargo_test_cmd = ["cargo", "test", "export_bindings_"]
 cargo_test_res = subprocess.run(cargo_test_cmd)
 if cargo_test_res.returncode != 0:
