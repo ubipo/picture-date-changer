@@ -99,9 +99,14 @@ jobs:
       
       - name: Test(Windows only)
         run: |
-          echo "$PKG_CONFIG_PATH"
-          tree "$RUNNER_TEMP/setup-msys2/"
+          echo "Runner temp: >>$RUNNER_TEMP<<"
+          echo "PKG_CONFIG_PATH: >>$PKG_CONFIG_PATH<<"
+          echo "Runner temp tree: "
+          tree "$RUNNER_TEMP"
+          echo "Setup msys2 tree: "
           tree "D:\a\_temp\setup-msys2"
+          echo "Msys2 bin location: "
+          gcm msys2*
           
       - name: Python setup
         uses: actions/setup-python@v4
