@@ -94,20 +94,15 @@ jobs:
             mingw-w64-x86_64-imagemagick
 
       - name: Set PKG_CONFIG_PATH (Windows only)
+        if: matrix.platform == 'windows-latest'
         run: |
           # Msys2 is installed in RUNNER_TEMP / setup-msys2
-          echo "PKG_CONFIG_PATH=${{ runner.temp }}/msys64/mingw64" >> ${{ github.env }}
+          echo "PKG_CONFIG_PATH=${{ runner.temp }}/msys64/mingw64/lib/pkgconfig:${{ runner.temp }}/msys64/mingw64/share/pkgconfig" >> ${{ github.env }}
       
-      - name: Test(Windows only)
+      - name: Show PKG_CONFIG_PATH (Windows only)
+        if: matrix.platform == 'windows-latest'
         run: |
-          echo "Runner temp: >>$RUNNER_TEMP<<"
-          echo "Runner temp context: >>${{ runner.temp }}<<"
           echo "PKG_CONFIG_PATH: >>${{ env.PKG_CONFIG_PATH }}<<"
-          echo "PKG_CONFIG_PATH tree: "
-          tree "${{ env.PKG_CONFIG_PATH }}"
-          echo "Msys2 bin location: "
-          echo "Exiting early..."
-          exit 1
           
       - name: Python setup
         uses: actions/setup-python@v4
