@@ -3,3 +3,4 @@
 !/dist/.gitkeep
 dist-ssr
 *.local
+/src/host-ui-bridge/generated-bindings.d.ts
