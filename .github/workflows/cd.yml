@@ -96,7 +96,7 @@ jobs:
       - name: Set PKG_CONFIG_PATH (Windows only)
         run: |
           # Msys2 is installed in RUNNER_TEMP / setup-msys2
-          echo "PKG_CONFIG_PATH=${{ runner.temp }}/setup-msys2/msys64/mingw64" >> ${{ github.env }}
+          echo "PKG_CONFIG_PATH=${{ runner.temp }}/msys64/mingw64" >> ${{ github.env }}
       
       - name: Test(Windows only)
         run: |
