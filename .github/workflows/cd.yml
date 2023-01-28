@@ -95,7 +95,7 @@ jobs:
       - name: Set PKG_CONFIG_PATH (Windows only)
         run: |
           # Msys2 is installed in RUNNER_TEMP / setup-msys2
-          echo "PKG_CONFIG_PATH=$RUNNER_TEMP/setup-msys2/mingw64/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ runner.temp }}/setup-msys2/mingw64/lib/pkgconfig" >> ${{ github.env }}
       
       - name: Test(Windows only)
         run: |
@@ -103,11 +103,11 @@ jobs:
           echo "Runner temp context: >>${{ runner.temp }}<<"
           echo "PKG_CONFIG_PATH: >>$PKG_CONFIG_PATH<<"
           echo "Runner temp tree: "
-          tree "$RUNNER_TEMP"
-          echo "Setup msys2 tree: "
-          tree "D:\a\_temp\setup-msys2"
+          tree "${{ runner.temp }}"
           echo "Msys2 bin location: "
           gcm msys2*
+          echo "Exiting early..."
+          exit 1
           
       - name: Python setup
         uses: actions/setup-python@v4
