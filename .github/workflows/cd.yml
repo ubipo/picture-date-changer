@@ -51,7 +51,7 @@ jobs:
         platform: [
           # TODO: Add gexiv2 macos dependency
           # macos-latest,
-          ubuntu-20.04,
+          # ubuntu-20.04,
           windows-latest
         ]
     runs-on: ${{ matrix.platform }}
@@ -100,6 +100,7 @@ jobs:
       - name: Test(Windows only)
         run: |
           echo "Runner temp: >>$RUNNER_TEMP<<"
+          echo "Runner temp context: >>${{ runner.temp }}<<"
           echo "PKG_CONFIG_PATH: >>$PKG_CONFIG_PATH<<"
           echo "Runner temp tree: "
           tree "$RUNNER_TEMP"
