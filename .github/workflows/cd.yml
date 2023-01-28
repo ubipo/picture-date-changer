@@ -88,6 +88,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          location: RUNNER_TEMP
           install: >-
             mingw-w64-x86_64-gexiv2
             mingw-w64-x86_64-imagemagick
@@ -95,7 +96,7 @@ jobs:
       - name: Set PKG_CONFIG_PATH (Windows only)
         run: |
           # Msys2 is installed in RUNNER_TEMP / setup-msys2
-          echo "PKG_CONFIG_PATH=${{ runner.temp }}/setup-msys2/msys64/mingw64/lib/pkgconfig" >> ${{ github.env }}
+          echo "PKG_CONFIG_PATH=${{ runner.temp }}/setup-msys2/msys64/mingw64" >> ${{ github.env }}
       
       - name: Test(Windows only)
         run: |
