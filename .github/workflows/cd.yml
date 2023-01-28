@@ -13,7 +13,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-20.04, windows-latest]
+        platform: [
+          # TODO: Add gexiv2 macos dependency
+          # macos-latest,
+          ubuntu-20.04,
+          windows-latest
+        ]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -26,16 +31,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev \
             libayatana-appindicator3-dev librsvg2-dev \
-            libgexiv2-dev
-
-      - name: MSYS2 setup (Windows only)
-        if: matrix.platform == 'windows-latest'
-        uses: msys2/setup-msys2@v2
+            libgexiv2-dev libmagickwand-dev
 
       - name: Install dependencies (Windows only)
         if: matrix.platform == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gexiv2
+            mingw-w64-x86_64-imagemagick
+
+      - name: Set PKG_CONFIG_PATH (Windows only)
         run: |
-          msys2 -c 'pacman -S mingw-w64-x86_64-gexiv2 --noconfirm'
+          echo "PKG_CONFIG_PATH='C:\msys64\mingw64\lib\pkgconfig'" >> $GITHUB_ENV
+      
+      - name: Test(Windows only)
+        run: |
+          echo $PKG_CONFIG_PATH
+          tree C:\msys64\mingw64\lib\pkgconfig
           
       - name: Python setup
         uses: actions/setup-python@v4
