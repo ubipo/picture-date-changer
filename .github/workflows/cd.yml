@@ -42,7 +42,8 @@ jobs:
         run: |
           wget -O ImageMagick-7.tar.gz \
             "https://download.imagemagick.org/archive/ImageMagick-$IMAGE_MAGICK_VERSION.tar.gz"
-          tar -xvf ImageMagick-7.tar.gz
+          mkdir ImageMagick-7
+          tar -xf ImageMagick-7.tar.gz -C ImageMagick-7 --strip-components=1
           cd ImageMagick-7
           ./configure
           make -j$(nproc)
@@ -61,12 +62,12 @@ jobs:
 
       - name: Set PKG_CONFIG_PATH (Windows only)
         run: |
-          echo "PKG_CONFIG_PATH='C:\msys64\mingw64\lib\pkgconfig'" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $GITHUB_ENV
       
       - name: Test(Windows only)
         run: |
           echo $PKG_CONFIG_PATH
-          tree 'C:\msys64'
+          tree 'C:\msys64\mingw64\lib'
           
       - name: Python setup
         uses: actions/setup-python@v4
