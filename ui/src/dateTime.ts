@@ -1,4 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill'
+import dayjs from 'dayjs'
 
 export const Instant = Temporal.Instant
 export type Instant = Temporal.Instant
@@ -21,6 +22,25 @@ export const getLocalZone = () => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
-export const toLocalDateTime = (
+export const strToLocalDateTime = (
     iso8601: Iso8601DateTime
 ) => Instant.from(iso8601).toZonedDateTimeISO(getLocalZone())
+
+/**
+ * Lossy conversion (dayjs doesn't support named time zones, only offsets)
+ */
+export const localDateTimeToDayjs = (
+    dateTime: ZonedDateTime
+) => dayjs(dateTime.toString({ timeZoneName: 'never' }))
+
+export const maybeLocalDateTimeToDayjs = (
+    dateTime: ZonedDateTime | null
+) => dateTime ? localDateTimeToDayjs(dateTime) : null
+
+export const dayjsToLocalDateTime = (
+    dayjs: dayjs.Dayjs
+) => strToLocalDateTime(dayjs.toISOString())
+
+export const maybeDayjsToLocalDateTime = (
+    dayjs: dayjs.Dayjs | null
+) => dayjs ? dayjsToLocalDateTime(dayjs) : null

@@ -1,4 +1,4 @@
-import { compareIso8601, toLocalDateTime } from './dateTime.js'
+import { compareIso8601, strToLocalDateTime } from './dateTime.js'
 import { MediaWithDateTime } from './host-ui-bridge/extra-types.js'
 
 export type DayOfMonthMedia = { day: number, medias: MediaWithDateTime[] }
@@ -14,7 +14,7 @@ export const organizeMediaByDate = (
     media: MediaWithDateTime[]
 ): YearMedia[] => numberKeyEntries(
     media.reduce((years, media) => {
-        const dateTime = toLocalDateTime(media.dateTime)
+        const dateTime = strToLocalDateTime(media.dateTime)
         const [year, month, day] = [dateTime.year, dateTime.month, dateTime.day]
         const months = years[year] ?? []
         const days = months[month] ?? []

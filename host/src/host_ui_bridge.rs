@@ -37,6 +37,7 @@ bridge_items! (
 
     #[serde(tag = "kind")]
     pub enum MessageToHost {
+        SendLatestMedia,
         AddMedia,
         ChangeMediaDateTime { payload: ChangeMediaDateTimePayload },
         LoadMediaPreview { payload: LoadMediaPreviewPayload },

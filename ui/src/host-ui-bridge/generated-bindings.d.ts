@@ -4,7 +4,7 @@ export interface LoadMediaPreviewPayload { path: string, }
 
 export interface Media { path: string, dateTime: string | null, }
 
-export type MessageToHost = { kind: "addMedia" } | { kind: "changeMediaDateTime", payload: ChangeMediaDateTimePayload, } | { kind: "loadMediaPreview", payload: LoadMediaPreviewPayload, };
+export type MessageToHost = { kind: "sendLatestMedia" } | { kind: "addMedia" } | { kind: "changeMediaDateTime", payload: ChangeMediaDateTimePayload, } | { kind: "loadMediaPreview", payload: LoadMediaPreviewPayload, };
 
 export type MessageToUi = { kind: "mediaLoading" } | { kind: "mediaLoadingComplete", payload: MediaLoadingCompletePayload, } | { kind: "mediaLoadingError", error: MediaLoadingErrorPayload, } | { kind: "mediaPreviewLoaded", payload: MediaPreviewLoadedPayload, } | { kind: "mediaPreviewLoadError", payload: MediaPreviewLoadErrorPayload, };
 

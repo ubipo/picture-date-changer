@@ -41,6 +41,7 @@ export default function PictureDateChanger() {
         toast('Error loading media files', { type: 'error' })
       })
     ]
+    hostUiBridge.emit('sendLatestMedia')
     return () => {
       listenerPromises.forEach(promise => promise.then(remover => remover()))
     }
