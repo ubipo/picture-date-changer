@@ -7,8 +7,9 @@ and drag-and-drop reordering.
 
 ### Dependencies
 
-* [Rust](https://www.rust-lang.org/tools/install)
-* [Node.js](https://nodejs.org)
+* [Rust](https://www.rust-lang.org/tools/install) (tested on 1.69.0)
+* [Node.js](https://nodejs.org) (tested on 19.4.0)
+* [Python 3](https://www.python.org/downloads/) (tested on 3.10.9)
 * Tauri CLI: `cargo install tauri-cli`
 * UI dependencies: `cd ui && npm install && cd ..`
 
