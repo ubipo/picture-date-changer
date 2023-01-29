@@ -1,4 +1,4 @@
-# Picture Date Changer
+# Picture Date Changer 🖼️📆
 
 Change the date or time of multiple pictures at a time, with visual previews
 and drag-and-drop reordering. 
