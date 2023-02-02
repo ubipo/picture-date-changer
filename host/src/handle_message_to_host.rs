@@ -1,13 +1,21 @@
-use std::{time::Duration, collections::HashMap, sync::{Arc, Mutex}};
+use std::{collections::HashMap, sync::{Arc, Mutex}};
 
 use chrono::DateTime;
 use tauri::AppHandle;
 
 use crate::{
     host_ui_bridge::{
-        MessageToHost, MediaLoadingCompletePayload, MessageToUi, ChangeMediaDateTimePayload, LoadMediaPreviewPayload, MediaPreviewLoadedPayload, MediaPreviewLoadErrorPayload, Media, ToUiSender
+        MessageToHost, MediaLoadingCompletePayload, MessageToUi,
+        ChangeMediaDateTimePayload, LoadMediaPreviewPayload,
+        MediaPreviewLoadedPayload, Media, ToUiSender, MediaPreviewLoadedResult, MediaPreviewSuccess
     },
-    load_media::{load_media_preview_data_uri, pick_folders, path_to_media, recursively_find_file_paths}, media_datetime::{save_original_date_time_to_metadata, FixedOffsetOrUtcDateTime}
+    load_media::{
+        load_media_preview_data_uri, pick_folders, path_to_media,
+        recursively_find_file_paths
+    },
+    media_datetime::{
+        save_original_date_time_to_metadata, FixedOffsetOrUtcDateTime
+    }
 };
 
 pub fn handle_message_to_host(
@@ -68,15 +76,13 @@ pub fn handle_message_to_host(
             payload: LoadMediaPreviewPayload { path }
         } => {
             tokio::spawn(async move {
-                let message = match load_media_preview_data_uri(&path).await {
-                    Ok(data_uri) => MessageToUi::MediaPreviewLoaded {
-                        payload: MediaPreviewLoadedPayload { path, data_uri }
-                    },
-                    Err(err) => MessageToUi::MediaPreviewLoadError {
-                        payload: MediaPreviewLoadErrorPayload { path, error: err }
-                    }
+                let result = match load_media_preview_data_uri(&path).await {
+                    Ok(data_uri) => MediaPreviewLoadedResult::Success(MediaPreviewSuccess { data_uri }),
+                    Err(err) => MediaPreviewLoadedResult::Error { message: err.to_string() },
                 };
-                app_handle.send_to_ui(message);
+                app_handle.send_to_ui(MessageToUi::MediaPreviewLoaded {
+                    payload: MediaPreviewLoadedPayload { path, result }
+                },);
             });
         },
     }

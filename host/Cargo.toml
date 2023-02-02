@@ -1,14 +1,15 @@
 [package]
 name = "picture-date-changer"
 version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+description = "Change the date or time of multiple pictures at a time"
+authors = [
+    "Pieter Fiers <pieter@pfiers.net>",
+    "Tomas Fiers <tomas.fiers@gmail.com>",
+]
+license = "GPL-3-only"
+repository = "https://github.com/ubipo/picture-date-changer/"
 edition = "2021"
 rust-version = "1.57"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
 tauri-build = { version = "1.2", features = [] }

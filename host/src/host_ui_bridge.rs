@@ -50,27 +50,27 @@ bridge_items! (
         pub new_media: Vec<Media>,
     },
 
-    pub struct MediaLoadingErrorPayload {
-        pub error: String,
+    pub struct MediaPreviewSuccess {
+        pub data_uri: String,
+    },
+
+    pub enum MediaPreviewLoadedResult {
+        // ts-rs doesn't handle serde attributes (camelCase) on enum variants
+        Success(MediaPreviewSuccess),
+        Error { message: String },
     },
 
     pub struct MediaPreviewLoadedPayload {
         pub path: String,
-        pub data_uri: String,
-    },
-
-    pub struct MediaPreviewLoadErrorPayload {
-        pub path: String,
-        pub error: String,
+        pub result: MediaPreviewLoadedResult,
     },
 
     #[serde(tag = "kind")]
     pub enum MessageToUi {
         MediaLoading,
         MediaLoadingComplete { payload: MediaLoadingCompletePayload },
-        MediaLoadingError { error: MediaLoadingErrorPayload },
+        MediaLoadingError { message: String },
         MediaPreviewLoaded { payload: MediaPreviewLoadedPayload },
-        MediaPreviewLoadError { payload: MediaPreviewLoadErrorPayload },
     }
 );
 

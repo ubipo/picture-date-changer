@@ -12,12 +12,10 @@ use std::{collections::HashMap, sync::{Arc, Mutex}};
 
 use host_ui_bridge::{RX_EVENT_NAME, Media};
 use tauri::Manager;
-use magick_rust::magick_wand_genesis;
 
 use crate::handle_message_to_host::handle_message_to_host;
 
 fn main() {
-    magick_wand_genesis();
     let shared_loaded_media_by_path = Arc::new(Mutex::new(
         HashMap::<String, Media>::new()
     ));
