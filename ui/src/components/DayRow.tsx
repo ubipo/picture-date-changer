@@ -1,9 +1,10 @@
 import { DragEvent, ReactNode, useState } from "react";
-import { PlainDate } from "../dateTime";
+import { PlainDate } from "../service/dateTime";
 import { hostUiBridge } from "../host-ui-bridge";
 import { MediaWithDateTime } from "../host-ui-bridge/extra-types";
 import LazyMedia from "./LazyMedia";
 import MediaDateTimePicker from "./MediaDateTimePicker";
+import { getDataTransferPath } from "../service/dragDrop";
 
 function DayRowMedia(
     { media }: { media: MediaWithDateTime }
@@ -73,9 +74,17 @@ function WithSideDropZone(
                 left: position === DragZonePosition.LEFT ? `-${EXTRA_WIDTH_SIDES}rem` : undefined,
                 right: position === DragZonePosition.RIGHT ? `-${EXTRA_WIDTH_SIDES}rem` : undefined,
                 width: `${(isDraggedOver ? WIDTH_DRAGGED_OVER : WIDTH_DEFAULT) + EXTRA_WIDTH_SIDES * 2}rem`,
-                zIndex: 10,
+                zIndex: 1000,
+                background: 'red'
+            }}
+            // preventDefault() on 'dragover' event is needed to allow dropping
+            onDragOver={e => {
+                e.preventDefault()
+                e.dataTransfer.dropEffect = 'move'
             }}
             onDrop={e => {
+                console.log('Dropped!', e.dataTransfer)
+                e.preventDefault()
                 setIsDraggedOver(false)
                 onDrop(e)
             }}
@@ -93,7 +102,8 @@ export default function DayRow(
         mediaBefore: MediaWithDateTime,
         mediaAfter: MediaWithDateTime,
     ) {
-        const mediaPath = event.dataTransfer.getData('media-path')
+        console.log('Dropped!', event.dataTransfer)
+        const mediaPath = getDataTransferPath(event.dataTransfer)
         console.log('Media dropped!', mediaPath, mediaBefore, mediaAfter)
     }
 
