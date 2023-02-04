@@ -26,7 +26,9 @@ bridge_items! (
         pub date_time: Option<String>,
     },
 
-    pub struct ChangeMediaDateTimePayload {
+    // Structs like this one need to be separate (as opposed to inline) because
+    // ts-rs doesn't handle serde attributes (camelCase) on inline structs
+    pub struct ChangeMediaDateTimeExactPayload {
         pub path: String,
         pub new_date_time: String,
     },
@@ -35,12 +37,19 @@ bridge_items! (
         pub path: String,
     },
 
+    pub struct ChangeMediaDateTimeInterpolatedPayload {
+        pub before_path: String,
+        pub target_path: String,
+        pub after_path: String,
+    },
+
     #[serde(tag = "kind")]
     pub enum MessageToHost {
         SendLatestMedia,
         AddMedia,
-        ChangeMediaDateTime { payload: ChangeMediaDateTimePayload },
         LoadMediaPreview { payload: LoadMediaPreviewPayload },
+        ChangeMediaDateTimeExact { payload: ChangeMediaDateTimeExactPayload },
+        ChangeMediaDateTimeInterpolated { payload: ChangeMediaDateTimeInterpolatedPayload },
     }
 );
 

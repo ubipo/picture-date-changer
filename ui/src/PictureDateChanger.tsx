@@ -3,7 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '@mui/material'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { organizeMediaByDate, YearMedia } from './organizeMediaByDate';
+import { organizeMediaByDate, YearMedia } from './service/organizeMediaByDate';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 import YearsScrollView from './components/YearsScrollView';
 import { hostUiBridge } from './host-ui-bridge/index.js';
@@ -77,6 +77,7 @@ export default function PictureDateChanger() {
         {status && <section className='bg-slate-600 text-white p-[0.25em]'>{status}</section>}
       </div>
       <Fab
+        title='Add media files'
         sx={{ position: 'fixed', bottom: '1rem', right: '1rem' }}
         color='primary'
         onClick={() => hostUiBridge.emit('addMedia')}>

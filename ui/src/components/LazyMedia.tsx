@@ -2,6 +2,7 @@ import { CircularProgress } from "@mui/material";
 import { DragEvent, useEffect, useState } from "react";
 import { hostUiBridge } from "../host-ui-bridge";
 import { Media } from "../host-ui-bridge/generated-bindings";
+import { setDataTransferPath } from "../service/dragDrop";
 
 class MediaLoadError extends Error {
     constructor(message: string) {
@@ -20,9 +21,9 @@ export default function LazyMedia(
 
     function handleDragStart(event: DragEvent<HTMLDivElement>) {
         // We do not support anything else than moving
-        // This overrides whatever the user requested using modifier keys
+        // This overrides whatever action the user requested using modifier keys
         event.dataTransfer.dropEffect = 'move'
-        event.dataTransfer.setData('media-path', media.path)
+        setDataTransferPath(event.dataTransfer, media.path)
     }
 
     useEffect(() => {

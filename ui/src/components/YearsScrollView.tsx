@@ -1,5 +1,5 @@
-import { YearMedia } from "../organizeMediaByDate";
-import { PlainDate, PlainYearMonth } from "../dateTime";
+import { YearMedia } from "../service/organizeMediaByDate";
+import { PlainDate, PlainYearMonth } from "../service/dateTime";
 import DayRow from "./DayRow";
 
 export default function YearsScrollView(

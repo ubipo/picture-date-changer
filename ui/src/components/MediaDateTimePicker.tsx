@@ -1,6 +1,6 @@
 import { DatePicker } from "@mui/x-date-pickers-pro";
 import { useState } from "react";
-import { dayjsToLocalDateTime, maybeDayjsToLocalDateTime, maybeLocalDateTimeToDayjs, strToLocalDateTime, ZonedDateTime } from "../dateTime";
+import { dayjsToLocalDateTime, maybeDayjsToLocalDateTime, maybeLocalDateTimeToDayjs, strToLocalDateTime, ZonedDateTime } from "../service/dateTime";
 import { Media } from "../host-ui-bridge/generated-bindings";
 
 export default function MediaDateTimePicker(
