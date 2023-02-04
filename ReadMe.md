@@ -33,7 +33,7 @@ application entrypoint and is written in Rust, using
 editing, [Chrono](https://docs.rs/chrono/latest/chrono/) for date/time,
 [Tokio](https://docs.rs/tokio/latest/tokio/) for async, and
 [magic-rust](https://docs.rs/crate/magick_rust/0.4.0) (wrapper around
-[ImageMagick](https://imagemagick.org/index.php)) to preview/thumbnailify
+[ImageMagick](https://imagemagick.org/index.php )) to preview/thumbnailify
 images. It uses the [Tauri framework](https://tauri.app/) to interact with the
 OS and to open a window for the UI WebView. The UI is written in
 [TypeScript](https://www.typescriptlang.org/) and bundled with
