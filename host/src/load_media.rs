@@ -48,7 +48,6 @@ pub async fn pick_folders() -> Option<Vec<PathBuf>> {
 pub async fn load_media_preview_data_uri(
     path: &str
 ) -> Result<DataUri, String> {
-    return Result::Err("Not implemented".to_string());
     let wand = MagickWand::new();
     wand.read_image(path).map_err(|e| e.to_string())?;
     wand.fit(MAX_WIDTH, MAX_HEIGHT);
